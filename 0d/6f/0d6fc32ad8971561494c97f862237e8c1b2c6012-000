@@ -1,0 +1,15 @@
+{
+  "coordinate_system": { "origin": "top-left", "canvas_width": 1410, "canvas_height": 1788, "units": "reference pixels" },
+  "reference": {
+    "file": "assets/reffinal4-5.png",
+    "panel_polygon_percent": [[8.5, 0], [83, 0], [49, 100], [0, 100], [0, 25]],
+    "palette": { "background": "#1a1a1a", "orange": "#f19e46", "white": "#ffffff" },
+    "type": { "family": "SF Pro Display", "weight": 700, "case": "uppercase" }
+  },
+  "production": {
+    "format": "4x5",
+    "canvas": [1080, 1350],
+    "output": [3240, 4050],
+    "layers_back_to_front": ["church", "five-point charcoal panel", "exact text hierarchy", "ZenRay logo", "four social logos"]
+  }
+}

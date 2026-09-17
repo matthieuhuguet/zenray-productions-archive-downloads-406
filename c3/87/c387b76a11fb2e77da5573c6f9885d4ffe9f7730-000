@@ -1,0 +1,24 @@
+# Procedural Modeling Commercial HDA
+
+Reusable 4:5 commercial rebuilt from `assets/reffinal4-5.png` for Matthieu Huguet's Houdini shorts.
+
+## Asset families
+
+| Family | Instances | Parameters |
+|---|---:|---|
+| Text hierarchy | 7 | exact copy, size, spacing, color |
+| Church image | 1 | position, scale, brightness, saturation |
+| Diagonal panel | 1 | five measured polygon points |
+| Brand assets | 5 | ZenRay plus four social SVG logos |
+| Format geometry | 1 | 1080 × 1350 rendered at 3× |
+
+## Build and render
+
+```zsh
+python3 Scripts/build_from_template.py
+zsh Scripts/render.sh
+```
+
+Open `index.html` to tune the title, panel edge and church position. The controls never appear in the rendered PNG.
+
+Edit `_params.json` to change content or defaults. Do not edit generated `index.html`; it is rebuilt from the template.

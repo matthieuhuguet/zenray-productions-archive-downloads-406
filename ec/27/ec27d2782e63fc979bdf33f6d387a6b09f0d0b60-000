@@ -1,0 +1,24 @@
+# Procedural Modeling Commercial
+
+Source format: 1600 × 900, 16:9. Coordinate origin: top left.
+
+## Layer order
+
+1. Two procedural project slices, including a vertical crop focused on the church entrance.
+2. Media contrast shade.
+3. Charcoal information panel with a diagonal right edge.
+4. Primary and secondary text hierarchy.
+5. Call to action and identity marks.
+
+## Measured reference geometry
+
+| Element | Source measurement |
+|---|---|
+| Information panel | top-right x 696, bottom-right x 533, full height 900 |
+| Main text zone | x 94 to 512, y 190 to 302 |
+| Secondary text zone | x 96 to 536, y 307 to 406 |
+| Media field | x 530 to 1600, full height |
+
+Raster typography classification: sans, normal width, expanded tracking. No source font family is claimed. Production uses SF Pro Display Bold because the user explicitly selected it.
+
+The production palette is silver `#c5c8cd`, orange `#f19e46`, charcoal, and muted silver. White text is forbidden.

@@ -1,0 +1,111 @@
+import os
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+W, H = 3072, 3840
+f_garamond = os.path.expanduser('~/Library/Fonts/ArchiveGaramondStd-BoldItalic.ttf')
+f_sf_bold = os.path.expanduser('~/Library/Fonts/SF-Pro-Display-Bold.otf')
+f_sf_reg = os.path.expanduser('~/Library/Fonts/SF-Pro-Display-Regular.otf')
+f_euph = '/System/Library/Fonts/Supplemental/EuphemiaCAS.ttc'
+f_arial = '/System/Library/Fonts/Supplemental/Arial Unicode.ttf'
+K_SPECIAL = {'ᕙ': f_euph, 'ᕗ': f_euph, '▿': f_arial}
+
+# 1. Base frame (black background + center video)
+frame = Image.new('RGB', (W, H), (0, 0, 0))
+
+# Load a test video frame from rush
+rush_frame_path = '/Users/zenray/Downloads/tmp-3D-houdini/shorts2/frames/frame_0680.png'
+rf = Image.open(rush_frame_path)
+img_w = W
+img_h = int(round(rf.height * W / rf.width))
+rf_scaled = rf.resize((img_w, img_h), Image.Resampling.LANCZOS)
+img_y = int(1920 - img_h / 2)
+frame.paste(rf_scaled, (0, img_y))
+
+# 2. Render Title (v2 style)
+title_layer = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+dt = ImageDraw.Draw(title_layer)
+
+def draw_tracked(draw, text, font, y, color, tracking_ratio):
+    chars = list(text)
+    char_widths = [draw.textbbox((0, 0), c, font=font)[2] - draw.textbbox((0, 0), c, font=font)[0] for c in chars]
+    avg_w = sum(char_widths) / len(char_widths) if char_widths else 0
+    tracking = avg_w * tracking_ratio
+    total_w = sum(char_widths) + tracking * (len(chars) - 1)
+    cur_x = (W - total_w) / 2
+    for i, c in enumerate(chars):
+        draw.text((cur_x, y), c, font=font, fill=color)
+        cur_x += char_widths[i] + tracking
+    return total_w
+
+c_title = (196, 199, 206)
+font_title_top = ImageFont.truetype(f_sf_bold, 170)
+font_title_sub = ImageFont.truetype(f_sf_bold, 80)
+draw_tracked(dt, 'HOUDINI', font_title_top, 540, c_title, 0.85)
+draw_tracked(dt, 'STILT HOUSE', font_title_sub, 730, c_title, 1.1)
+
+frame.paste(title_layer, (0, 0), title_layer)
+
+# 3. Render Subtitle Card (Cue 10 with kaomoji)
+def render_card_v2(line, size):
+    c_sub = (239, 159, 71)
+    font_g = ImageFont.truetype(f_garamond, size)
+    font_sf = ImageFont.truetype(f_sf_reg, size)
+    faces_spec = {k: ImageFont.truetype(v, size) for k, v in K_SPECIAL.items()}
+    
+    words = line.split(' ')
+    word_data = []
+    for w in words:
+        if any(c in K_SPECIAL for c in w):
+            char_runs = []
+            for c in w:
+                f = faces_spec[c] if c in K_SPECIAL else font_sf
+                char_runs.append((c, f, f.getlength(c)))
+            w_len = sum(x[2] for x in char_runs)
+            word_data.append(('special', char_runs, w_len))
+        else:
+            word_data.append(('garamond', w, font_g.getlength(w)))
+            
+    space = 32
+    total_w = sum(x[2] for x in word_data) + space * (len(word_data) - 1)
+    
+    pad = 120
+    card_w = int(total_w + pad * 2)
+    card_h = int(size * 1.6 + pad * 2)
+    
+    card = Image.new('RGBA', (card_w, card_h), (0, 0, 0, 0))
+    shadow = Image.new('RGBA', (card_w, card_h), (0, 0, 0, 0))
+    d_sh = ImageDraw.Draw(shadow)
+    text_l = Image.new('RGBA', (card_w, card_h), (0, 0, 0, 0))
+    d_tx = ImageDraw.Draw(text_l)
+    
+    base_y = pad + int(size * 1.1)
+    off_y = 36 # ~40px drop shadow
+    
+    cur_x = pad
+    for item in word_data:
+        if item[0] == 'garamond':
+            w = item[1]
+            d_sh.text((cur_x, base_y + off_y), w, font=font_g, fill=(0, 0, 0, 230), anchor='ls')
+            d_tx.text((cur_x, base_y), w, font=font_g, fill=c_sub, anchor='ls')
+            cur_x += item[2] + space
+        else:
+            for c, f, clen in item[1]:
+                d_sh.text((cur_x, base_y + off_y), c, font=f, fill=(0, 0, 0, 230), anchor='ls')
+                d_tx.text((cur_x, base_y), c, font=f, fill=c_sub, anchor='ls')
+                cur_x += clen
+            cur_x += space
+            
+    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=16))
+    card.paste(shadow, (0, 0), shadow)
+    card.paste(text_l, (0, 0), text_l)
+    return card
+
+card1 = render_card_v2('thanks for watching, follow,', 106)
+card2 = render_card_v2('like for more! ᕙ(`▿´)ᕗ', 106)
+
+frame.paste(card1, (W // 2 - card1.width // 2, 2960 - card1.height // 2), card1)
+frame.paste(card2, (W // 2 - card2.width // 2, 3150 - card2.height // 2), card2)
+
+out_preview = '/Users/zenray/Downloads/tmp-3D-houdini/shorts2/preview_v2_full.png'
+frame.save(out_preview)
+print('Preview full saved successfully to:', out_preview)

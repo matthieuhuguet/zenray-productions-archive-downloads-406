@@ -1,0 +1,134 @@
+import os
+import subprocess
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+W, H, FPS = 3072, 3840, 60
+duration = 2.0
+total = int(round(duration * FPS))
+
+src_video = '/Users/zenray/Downloads/tmp-3D-houdini/shorts2/houdini_rush_30s.mov'
+src_audio = '/Users/zenray/Downloads/tmp-3D-houdini/shorts2/rdr2-loading-theme-30s.m4a'
+out_mov = '/Users/zenray/Downloads/tmp-3D-houdini/shorts2/test_render_2s.mov'
+
+# 1. Build title
+f_sf_bold = os.path.expanduser('~/Library/Fonts/SF-Pro-Display-Bold.otf')
+title_layer = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+dt = ImageDraw.Draw(title_layer)
+
+def draw_tracked(draw, text, font, y, color, tracking_ratio):
+    chars = list(text)
+    char_widths = [draw.textbbox((0, 0), c, font=font)[2] - draw.textbbox((0, 0), c, font=font)[0] for c in chars]
+    avg_w = sum(char_widths) / len(char_widths) if char_widths else 0
+    tracking = avg_w * tracking_ratio
+    total_w = sum(char_widths) + tracking * (len(chars) - 1)
+    cur_x = (W - total_w) / 2
+    for i, c in enumerate(chars):
+        draw.text((cur_x, y), c, font=font, fill=color)
+        cur_x += char_widths[i] + tracking
+    return total_w
+
+c_title = (196, 199, 206)
+font_title_top = ImageFont.truetype(f_sf_bold, 170)
+font_title_sub = ImageFont.truetype(f_sf_bold, 80)
+draw_tracked(dt, 'HOUDINI', font_title_top, 540, c_title, 0.85)
+draw_tracked(dt, 'STILT HOUSE', font_title_sub, 730, c_title, 1.1)
+
+# 2. Build Subtitle Card Cue 1
+f_garamond = os.path.expanduser('~/Library/Fonts/ArchiveGaramondStd-BoldItalic.ttf')
+def render_card_v2(line, size=108, color=(239, 159, 71)):
+    font_g = ImageFont.truetype(f_garamond, size)
+    words = line.split(' ')
+    word_data = [('garamond', w, font_g.getlength(w)) for w in words]
+    space = 32
+    total_w = sum(x[2] for x in word_data) + space * (len(word_data) - 1)
+    pad = 120
+    card_w = int(total_w + pad * 2)
+    card_h = int(size * 1.6 + pad * 2)
+    card = Image.new('RGBA', (card_w, card_h), (0, 0, 0, 0))
+    shadow = Image.new('RGBA', (card_w, card_h), (0, 0, 0, 0))
+    d_sh = ImageDraw.Draw(shadow)
+    text_l = Image.new('RGBA', (card_w, card_h), (0, 0, 0, 0))
+    d_tx = ImageDraw.Draw(text_l)
+    base_y = pad + int(size * 1.1)
+    off_y = 36
+    cur_x = pad
+    for item in word_data:
+        w = item[1]
+        d_sh.text((cur_x, base_y + off_y), w, font=font_g, fill=(0, 0, 0, 230), anchor='ls')
+        d_tx.text((cur_x, base_y), w, font=font_g, fill=color, anchor='ls')
+        cur_x += item[2] + space
+    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=16))
+    card.paste(shadow, (0, 0), shadow)
+    card.paste(text_l, (0, 0), text_l)
+    return card
+
+card1 = render_card_v2('Today I needed a break', 108)
+card2 = render_card_v2('from my church modeling project.', 108)
+
+punch_curve = [[0.5, 0.0], [0.68, 0.4], [0.85, 0.7], [1.02, 1.0], [1.14, 1.0],
+               [1.18, 1.0], [1.16, 1.0], [1.11, 1.0], [1.05, 1.0], [0.99, 1.0],
+               [0.96, 1.0], [0.97, 1.0], [0.99, 1.0], [1.01, 1.0], [1.0, 1.0]]
+
+def get_frames(im, cy):
+    out = []
+    for scale, alpha in punch_curve:
+        if alpha <= 0:
+            out.append(None)
+            continue
+        r = im.resize((int(im.width * scale), int(im.height * scale)), Image.Resampling.BILINEAR)
+        out.append((r, W // 2 - r.width // 2, cy - r.height // 2))
+    return out, (im, W // 2 - im.width // 2, cy - im.height // 2)
+
+line1_anim, line1_steady = get_frames(card1, 2960)
+line2_anim, line2_steady = get_frames(card2, 3150)
+
+# Dimensions for video
+img_w = 3072
+img_h = 1728
+img_y = int(1920 - img_h / 2)
+
+p_in = subprocess.Popen([
+    'ffmpeg', '-v', 'error', '-ss', '0', '-i', src_video,
+    '-vf', f'fps={FPS},scale={img_w}:{img_h}:flags=lanczos',
+    '-pix_fmt', 'rgb24', '-f', 'rawvideo', 'pipe:1'
+], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+
+p_out = subprocess.Popen([
+    'ffmpeg', '-y', '-v', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24',
+    '-s', f'{W}x{H}', '-r', str(FPS), '-i', 'pipe:0',
+    '-ss', '0', '-i', src_audio,
+    '-map', '0:v', '-map', '1:a',
+    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '17', '-pix_fmt', 'yuv420p',
+    '-c:a', 'aac', '-b:a', '320k', '-shortest', '-movflags', '+faststart',
+    '-frames:v', str(total), out_mov
+], stdin=subprocess.PIPE)
+
+nbytes = img_w * img_h * 3
+delay = 40
+
+for fi in range(total):
+    raw = p_in.stdout.read(nbytes)
+    frame = Image.new('RGB', (W, H), (0, 0, 0))
+    if len(raw) >= nbytes:
+        frame.paste(Image.fromarray(np.frombuffer(raw, np.uint8).reshape(img_h, img_w, 3)), (0, img_y))
+    frame.paste(title_layer, (0, 0), title_layer)
+    
+    # line 1
+    p1 = line1_anim[fi] if fi < len(line1_anim) else line1_steady
+    if p1 is not None:
+        frame.paste(p1[0], (p1[1], p1[2]), p1[0])
+        
+    # line 2
+    if fi >= delay:
+        k = fi - delay
+        p2 = line2_anim[k] if k < len(line2_anim) else line2_steady
+        if p2 is not None:
+            frame.paste(p2[0], (p2[1], p2[2]), p2[0])
+            
+    p_out.stdin.write(frame.tobytes())
+
+p_out.stdin.close()
+p_out.wait()
+p_in.kill()
+print('Finished 2s test render:', out_mov)

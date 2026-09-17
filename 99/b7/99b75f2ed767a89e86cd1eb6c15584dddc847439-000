@@ -1,0 +1,122 @@
+import os
+import subprocess
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+f_garamond = os.path.expanduser('~/Library/Fonts/ArchiveGaramondStd-BoldItalic.ttf')
+f_sf_bold = os.path.expanduser('~/Library/Fonts/SF-Pro-Display-Bold.otf')
+f_sf_reg = os.path.expanduser('~/Library/Fonts/SF-Pro-Display-Regular.otf')
+f_euph = '/System/Library/Fonts/Supplemental/EuphemiaCAS.ttc'
+f_arial = '/System/Library/Fonts/Supplemental/Arial Unicode.ttf'
+K_SPECIAL = {'ᕙ': f_euph, 'ᕗ': f_euph, '▿': f_arial}
+
+W, H = 3072, 3840
+
+def draw_tracked(draw, text, font, y, color, tracking_ratio):
+    chars = list(text)
+    char_widths = [draw.textbbox((0, 0), c, font=font)[2] - draw.textbbox((0, 0), c, font=font)[0] for c in chars]
+    avg_w = sum(char_widths) / len(char_widths) if char_widths else 0
+    tracking = avg_w * tracking_ratio
+    total_w = sum(char_widths) + tracking * (len(chars) - 1)
+    cur_x = (W - total_w) / 2
+    for i, c in enumerate(chars):
+        draw.text((cur_x, y), c, font=font, fill=color)
+        cur_x += char_widths[i] + tracking
+    return total_w
+
+def build_title_v2(cfg):
+    layer = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    t = cfg['title']
+    color = tuple(t.get('color', [196, 199, 206]))
+    if 'lines' in t:
+        for item in t['lines']:
+            font = ImageFont.truetype(os.path.expanduser(item['font']), item['size'])
+            tracking = item.get('tracking', 0.0)
+            draw_tracked(d, item['text'], font, item['y'], color, tracking)
+    return layer
+
+cfg_test = {
+    'title': {
+        'color': [196, 199, 206],
+        'lines': [
+            {'text': 'HOUDINI', 'size': 170, 'y': 540, 'tracking': 0.85, 'font': f_sf_bold},
+            {'text': 'STILT HOUSE', 'size': 80, 'y': 730, 'tracking': 1.1, 'font': f_sf_bold}
+        ]
+    }
+}
+
+t_img = build_title_v2(cfg_test)
+print('Title rendered successfully, size:', t_img.size)
+
+cues = [
+    ['Today I needed a break', 'from my church modeling project.'],
+    ['So I decided to start', 'a completely different project.'],
+    ['I chose to model this structure', 'based on a very expected thing.'],
+    ['Take a closer look,', 'can you guess what it is?'],
+    ['I think I will stop here', 'for this first blockout pass.'],
+    ['I will get back to it later', 'with much finer modeling.'],
+    ['It is always great to start from a blockout', 'before pushing a structure further,'],
+    ['even though this one', 'is already quite advanced.'],
+    ['Pretty solid progress', 'for a single day of work.'],
+    ['thanks for watching, follow,', 'like for more! ᕙ(`▿´)ᕗ']
+]
+
+def render_card_v2(line, size, color=(239, 159, 71)):
+    font_g = ImageFont.truetype(f_garamond, size)
+    font_sf = ImageFont.truetype(f_sf_reg, size)
+    faces_spec = {k: ImageFont.truetype(v, size) for k, v in K_SPECIAL.items()}
+    
+    words = line.split(' ')
+    word_data = []
+    for w in words:
+        if any(c in K_SPECIAL for c in w):
+            char_runs = []
+            for c in w:
+                f = faces_spec[c] if c in K_SPECIAL else font_sf
+                char_runs.append((c, f, f.getlength(c)))
+            w_len = sum(x[2] for x in char_runs)
+            word_data.append(('special', char_runs, w_len))
+        else:
+            word_data.append(('garamond', w, font_g.getlength(w)))
+            
+    space = 32
+    total_w = sum(x[2] for x in word_data) + space * (len(word_data) - 1)
+    
+    pad = 120
+    card_w = int(total_w + pad * 2)
+    card_h = int(size * 1.6 + pad * 2)
+    
+    card = Image.new('RGBA', (card_w, card_h), (0, 0, 0, 0))
+    shadow = Image.new('RGBA', (card_w, card_h), (0, 0, 0, 0))
+    d_sh = ImageDraw.Draw(shadow)
+    text_l = Image.new('RGBA', (card_w, card_h), (0, 0, 0, 0))
+    d_tx = ImageDraw.Draw(text_l)
+    
+    base_y = pad + int(size * 1.1)
+    off_y = 36
+    
+    cur_x = pad
+    for item in word_data:
+        if item[0] == 'garamond':
+            w = item[1]
+            d_sh.text((cur_x, base_y + off_y), w, font=font_g, fill=(0, 0, 0, 230), anchor='ls')
+            d_tx.text((cur_x, base_y), w, font=font_g, fill=color, anchor='ls')
+            cur_x += item[2] + space
+        else:
+            for c, f, clen in item[1]:
+                d_sh.text((cur_x, base_y + off_y), c, font=f, fill=(0, 0, 0, 230), anchor='ls')
+                d_tx.text((cur_x, base_y), c, font=f, fill=color, anchor='ls')
+                cur_x += clen
+            cur_x += space
+            
+    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=16))
+    card.paste(shadow, (0, 0), shadow)
+    card.paste(text_l, (0, 0), text_l)
+    return card
+
+for ci, cue in enumerate(cues):
+    c1 = render_card_v2(cue[0], 108)
+    c2 = render_card_v2(cue[1], 108)
+    print(f'Cue {ci+1} rendered: card1={c1.size}, card2={c2.size}')
+
+print('All cards rendered successfully!')

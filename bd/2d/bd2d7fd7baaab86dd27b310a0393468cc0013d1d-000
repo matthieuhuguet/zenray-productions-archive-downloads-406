@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+"""Build the exact 4:5 commercial from its HDA parameters."""
+
+# 2026-09-17 01:02, the reference geometry is rebuilt from one parameter source.
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PARAMS_PATH = ROOT / "_params.json"
+TEMPLATE_PATH = ROOT / "templates" / "procedural-modeling-commercial" / "template.html"
+OUTPUT_PATH = ROOT / "index.html"
+
+
+def build_social_icons(items: list[dict[str, str]]) -> str:
+    return "".join(
+        f'<img class="social-icon" src="{item["src"]}" alt="{item["name"]}">'
+        for item in items
+    )
+
+
+def build() -> None:
+    params = json.loads(PARAMS_PATH.read_text(encoding="utf-8"))
+    content, tokens, layout, assets = (params[key] for key in ("content", "tokens", "format", "assets"))
+    values = {
+        "CONFIG_JSON": json.dumps(params, ensure_ascii=False),
+        "FONT_FAMILY": tokens["fontFamily"], "FONT_PATH": tokens["fontPath"],
+        "FONT_WEIGHT": tokens["fontWeight"], "BACKGROUND": tokens["background"],
+        "WHITE": tokens["white"], "ORANGE": tokens["orange"], "TRACKING": tokens["tracking"],
+        "CANVAS_WIDTH": layout["canvasWidth"], "CANVAS_HEIGHT": layout["canvasHeight"],
+        "PANEL_CLIP": layout["panelClip"], "COPY_LEFT": layout["copyLeft"],
+        "COPY_TOP": layout["copyTop"], "COPY_WIDTH": layout["copyWidth"],
+        "TITLE_SIZE": layout["titleSize"], "THIRD_LINE_SIZE": layout["thirdLineSize"],
+        "NAME_SIZE": layout["nameSize"], "BOOKING_LABEL_SIZE": layout["bookingLabelSize"],
+        "BOOKING_DATE_SIZE": layout["bookingDateSize"], "CTA_SIZE": layout["ctaSize"],
+        "URL_SIZE": layout["urlSize"], "FOOTER_BOTTOM": layout["footerBottom"],
+        "CHURCH_POSITION": layout["churchPosition"], "CHURCH_SCALE": layout["churchScale"],
+        "CHURCH_BRIGHTNESS": layout["churchBrightness"], "CHURCH_SATURATION": layout["churchSaturation"],
+        "CHURCH": assets["church"], "ZENRAY_LOGO": assets["zenrayLogo"],
+        "SOCIAL_ICONS": build_social_icons(assets["social"]),
+        "TITLE_LINE_ONE": content["titleLineOne"], "TITLE_LINE_TWO": content["titleLineTwo"],
+        "TITLE_LINE_THREE": content["titleLineThree"], "NAME": content["name"],
+        "BOOKING_LABEL": content["bookingLabel"], "BOOKING_MONTH": content["bookingMonth"],
+        "BOOKING_YEAR": content["bookingYear"], "CTA": content["cta"], "URL": content["url"]
+    }
+    html = TEMPLATE_PATH.read_text(encoding="utf-8")
+    for key, value in values.items():
+        html = html.replace("{{" + key + "}}", str(value))
+    unresolved = sorted(set(re.findall(r"\{\{([A-Z0-9_]+)\}\}", html)))
+    if unresolved:
+        raise SystemExit(f"Unresolved template parameters: {unresolved}")
+    OUTPUT_PATH.write_text(html, encoding="utf-8")
+    print(OUTPUT_PATH)
+
+
+if __name__ == "__main__":
+    build()

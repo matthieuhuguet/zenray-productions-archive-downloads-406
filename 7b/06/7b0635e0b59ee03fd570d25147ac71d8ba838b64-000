@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+"""Build deterministic vertical project crops from the HDA parameters."""
+
+# 2026-09-17 00:34, project crops keep the commercial framing reproducible.
+import json
+from pathlib import Path
+
+from PIL import Image
+
+
+ROOT = Path(__file__).resolve().parents[1]
+params = json.loads((ROOT / "_params.json").read_text(encoding="utf-8"))
+for crop in params.get("projectCrops", []):
+    source = Image.open(ROOT / crop["source"])
+    box = (crop["left"], crop["top"], crop["left"] + crop["width"], crop["top"] + crop["height"])
+    source.crop(box).save(ROOT / crop["output"], quality=94, method=6)

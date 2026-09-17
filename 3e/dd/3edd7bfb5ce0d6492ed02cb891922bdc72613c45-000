@@ -1,0 +1,10 @@
+{
+  "coordinateSystem": "top-left source pixels",
+  "backgrounds": [
+    { "id": "matthieu-portrait-source", "file": "00-portrait-source.png", "width": 1123, "height": 1401, "sha256": "0dc41eef6c8cd3fb729881229df90bc4254dcc025dc70b90501ba9eedf102eea" },
+    { "id": "matthieu-head-square", "file": "00-matthieu-head-square.png", "width": 660, "height": 660, "sha256": "d55cb3aa0f9835ae12be00ebf84c6b130be0d44704417ee722056f7157a8272f" },
+    { "id": "procedural-grass", "file": "01-procedural-grass.webp", "width": 3840, "height": 2100, "sha256": "7dd9c275ce1f3b28d3a45c380d065179789626b2e7224deb0500385e8a02da79" },
+    { "id": "louisiana-bayou", "file": "02-louisiana-bayou.webp", "width": 3726, "height": 2100, "sha256": "bbccc2e3fb38619fdd462caa42cf0689e3d6c8d9c469dd9e039c8ae4f56892e7" },
+    { "id": "louisiana-church-vertical", "file": "02-louisiana-church-vertical.webp", "width": 1000, "height": 2100, "sha256": "71758ef983b60ba574dba855db0c4eb30a79895ef3b4da84cc3f9c1e6c894a2f" }
+  ]
+}

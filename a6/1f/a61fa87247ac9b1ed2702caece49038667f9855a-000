@@ -1,0 +1,26 @@
+#!/bin/zsh
+set -euo pipefail
+
+# 2026-09-17 01:02, render only the requested 4:5 commercial at 4K-class resolution.
+ROOT_DIR="${0:A:h:h}"
+CHROME_BIN=$(find "$HOME/Library/Caches/ms-playwright" -type f \( -name 'chrome-headless-shell' -o -name 'chrome' \) -perm +111 | head -1)
+if [[ -z "$CHROME_BIN" ]]; then
+  echo "Chromium not found" >&2
+  exit 1
+fi
+
+python3 "$ROOT_DIR/Scripts/build_from_template.py" >/dev/null
+"$CHROME_BIN" --headless --disable-gpu --hide-scrollbars --allow-file-access-from-files --force-device-scale-factor=3 --window-size=1080,1350 --screenshot="$ROOT_DIR/out/procedural-modeling-4x5-4k.png" "file://$ROOT_DIR/index.html?render=1"
+
+python3 - "$ROOT_DIR/out/procedural-modeling-4x5-4k.png" <<'PY'
+from pathlib import Path
+from PIL import Image
+import sys
+
+path = Path(sys.argv[1])
+actual = Image.open(path).size
+expected = (3240, 4050)
+if actual != expected:
+    raise SystemExit(f"Expected {expected}, got {actual}")
+print(f"{path.name}: {actual[0]}x{actual[1]}")
+PY

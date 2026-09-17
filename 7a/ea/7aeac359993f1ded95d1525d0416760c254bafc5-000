@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ZenRay Freelance Tech Artist</title>
+  <style>
+    /* 2026-09-17 01:02, geometry and typography reproduce reffinal4-5.png. */
+    @font-face { font-family: 'SF Pro Display Local'; src: url('file:///Users/zenray/Library/Fonts/SF-Pro-Display-Bold.otf') format('opentype'); font-weight: 700; }
+    :root {
+      --background: #1a1a1a; --white: #ffffff; --orange: #f19e46;
+      --tracking: 0.072em; --title-size: 76px; --third-line-size: 45px;
+      --name-size: 34px; --booking-label-size: 39px;
+      --booking-date-size: 74px; --cta-size: 31px; --url-size: 20px; --panel-clip: polygon(8.5% 0, 83% 0, 49% 100%, 0 100%, 0 25%);
+      --copy-left: 2.1%; --copy-top: 21.9%; --copy-width: 69%;
+      --church-position: 32% 50%; --church-scale: 1.03;
+      --church-brightness: 0.72; --church-saturation: 0.78;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #090909; font-family: 'SF Pro Display Local', sans-serif; }
+    body { display: grid; place-items: center; }
+    .canvas { position: relative; width: 1080px; height: 1350px; overflow: hidden; background: var(--background); color: var(--white); }
+    .church { position: absolute; inset: 0; margin: 0; overflow: hidden; background: var(--background); }
+    .church img { width: 100%; height: 100%; object-fit: cover; object-position: var(--church-position); transform: scale(var(--church-scale)); filter: brightness(var(--church-brightness)) saturate(var(--church-saturation)); }
+    .panel { position: absolute; z-index: 2; inset: 0; background: var(--background); clip-path: var(--panel-clip); }
+    .copy { position: absolute; z-index: 3; left: var(--copy-left); top: var(--copy-top); width: var(--copy-width); text-transform: uppercase; letter-spacing: var(--tracking); }
+    .title { margin: 0; font-size: var(--title-size); line-height: .94; letter-spacing: var(--tracking); }
+    .title span { display: block; white-space: nowrap; }
+    .title span + span { margin-top: .08em; }
+    .title .orange { color: var(--orange); }
+    .title .third { margin-top: .24em; font-size: var(--third-line-size); color: var(--white); letter-spacing: .13em; }
+    .name { margin-top: 13%; font-size: var(--name-size); line-height: 1; letter-spacing: .1em; }
+    .booking { margin-top: 8%; }
+    .booking-label { font-size: var(--booking-label-size); line-height: 1; }
+    .booking-date { margin-top: 2.2%; color: var(--orange); font-size: var(--booking-date-size); line-height: .9; }
+    .booking-date span { display: block; }
+    .cta { display: inline-block; margin-top: 5.5%; padding: .52em 1.02em .48em; background: var(--orange); color: var(--background); font-size: var(--cta-size); line-height: 1; letter-spacing: .06em; }
+    .url { margin-top: 2.7%; color: var(--white); font-size: var(--url-size); line-height: 1; letter-spacing: .045em; text-transform: none; }
+    .footer { position: absolute; z-index: 3; left: 2.1%; bottom: 20%; height: 40px; display: flex; align-items: center; gap: 22px; }
+    .zenray-logo { display: block; width: 112px; height: 34px; object-fit: contain; object-position: center; filter: brightness(0) invert(1); }
+    .socials { height: 40px; display: flex; align-items: center; gap: 14px; }
+    .social-icon { display: block; width: 34px; height: 34px; object-fit: contain; object-position: center; filter: brightness(0) invert(1); }
+    .render .controls { display: none; }
+    .controls { position: fixed; z-index: 20; right: 18px; top: 18px; width: 280px; padding: 14px; color: var(--white); background: rgba(26,26,26,.96); border: 1px solid rgba(255,255,255,.18); font: 12px/1.4 'SF Pro Display Local', sans-serif; }
+    .controls label { display: block; margin: 9px 0; }
+    .controls input { width: 100%; accent-color: var(--orange); }
+  </style>
+</head>
+<body>
+  <main class="canvas" aria-label="ZenRay freelance technical artist commercial">
+    <figure class="church"><img src="assets/02-louisiana-bayou.webp" alt="Louisiana Bayou church environment"></figure>
+    <div class="panel"></div>
+    <section class="copy">
+      <h1 class="title"><span>FREELANCE</span><span class="orange">TECH ARTIST</span><span class="third">FOR GAMES</span></h1>
+      <div class="name">MATTHIEU HUGUET</div>
+      <div class="booking"><div class="booking-label">BOOKING FOR</div><div class="booking-date"><span>SEPTEMBER</span><span>2026</span></div><div class="cta">LINK IN BIO</div><div class="url">matthieuhuguet.com</div></div>
+    </section>
+    <footer class="footer"><img class="zenray-logo" src="assets/zenray-logo.svg" alt="ZenRay"><div class="socials"><img class="social-icon" src="assets/social/instagram.svg" alt="Instagram"><img class="social-icon" src="assets/social/youtube.svg" alt="YouTube"><img class="social-icon" src="assets/social/linkedin.svg" alt="LinkedIn"><img class="social-icon" src="assets/social/artstation.svg" alt="ArtStation"></div></footer>
+  </main>
+  <aside class="controls">
+    <label>Title size<input data-variable="--title-size" type="range" min="60" max="92" value="76"></label>
+    <label>Panel top edge<input data-panel="1" type="range" min="76" max="90" value="83"></label>
+    <label>Church horizontal position<input data-variable="--church-position" type="range" min="20" max="75" value="32"></label>
+  </aside>
+  <script>
+    const CONFIG = {"content": {"titleLineOne": "FREELANCE", "titleLineTwo": "TECH ARTIST", "titleLineThree": "FOR GAMES", "name": "MATTHIEU HUGUET", "bookingLabel": "BOOKING FOR", "bookingMonth": "SEPTEMBER", "bookingYear": "2026", "cta": "LINK IN BIO", "url": "matthieuhuguet.com"}, "tokens": {"background": "#1a1a1a", "white": "#ffffff", "orange": "#f19e46", "fontFamily": "SF Pro Display Local", "fontPath": "file:///Users/zenray/Library/Fonts/SF-Pro-Display-Bold.otf", "fontWeight": 700, "tracking": "0.072em"}, "format": {"canvasWidth": 1080, "canvasHeight": 1350, "outputScale": 3, "panelClip": "polygon(8.5% 0, 83% 0, 49% 100%, 0 100%, 0 25%)", "copyLeft": "2.1%", "copyTop": "21.9%", "copyWidth": "69%", "titleSize": "76px", "thirdLineSize": "45px", "nameSize": "34px", "bookingLabelSize": "39px", "bookingDateSize": "74px", "ctaSize": "31px", "urlSize": "20px", "footerBottom": "20%", "churchPosition": "32% 50%", "churchScale": 1.03, "churchBrightness": 0.72, "churchSaturation": 0.78}, "assets": {"church": "assets/02-louisiana-bayou.webp", "zenrayLogo": "assets/zenray-logo.svg", "social": [{"name": "Instagram", "src": "assets/social/instagram.svg"}, {"name": "YouTube", "src": "assets/social/youtube.svg"}, {"name": "LinkedIn", "src": "assets/social/linkedin.svg"}, {"name": "ArtStation", "src": "assets/social/artstation.svg"}]}};
+    const root = document.documentElement;
+    document.querySelectorAll('[data-variable]').forEach(input => input.addEventListener('input', () => {
+      const variable = input.dataset.variable;
+      root.style.setProperty(variable, variable === '--church-position' ? `${input.value}% 50%` : `${input.value}px`);
+    }));
+    document.querySelector('[data-panel]').addEventListener('input', event => {
+      root.style.setProperty('--panel-clip', `polygon(8.5% 0, ${event.target.value}% 0, 49% 100%, 0 100%, 0 25%)`);
+    });
+    if (new URLSearchParams(location.search).get('render') === '1') document.body.classList.add('render');
+    document.fonts.ready.then(() => {
+      const canvas = document.querySelector('.canvas').getBoundingClientRect();
+      const fits = [...document.querySelectorAll('.copy, .copy *, .footer, .footer *')].every(element => {
+        const box = element.getBoundingClientRect();
+        return box.left >= canvas.left && box.top >= canvas.top && box.right <= canvas.right && box.bottom <= canvas.bottom;
+      });
+      document.body.dataset.ready = 'true';
+      document.body.dataset.fontLoaded = String(document.fonts.check('700 24px "SF Pro Display Local"'));
+      document.body.dataset.layoutFits = String(fits);
+    });
+  </script>
+</body>
+</html>

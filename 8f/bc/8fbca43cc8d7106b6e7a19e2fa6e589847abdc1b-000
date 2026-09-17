@@ -1,0 +1,53 @@
+{
+  "content": {
+    "titleLineOne": "FREELANCE",
+    "titleLineTwo": "TECH ARTIST",
+    "titleLineThree": "FOR GAMES",
+    "name": "MATTHIEU HUGUET",
+    "bookingLabel": "BOOKING FOR",
+    "bookingMonth": "SEPTEMBER",
+    "bookingYear": "2026",
+    "cta": "LINK IN BIO",
+    "url": "matthieuhuguet.com"
+  },
+  "tokens": {
+    "background": "#1a1a1a",
+    "white": "#ffffff",
+    "orange": "#f19e46",
+    "fontFamily": "SF Pro Display Local",
+    "fontPath": "file:///Users/zenray/Library/Fonts/SF-Pro-Display-Bold.otf",
+    "fontWeight": 700,
+    "tracking": "0.072em"
+  },
+  "format": {
+    "canvasWidth": 1080,
+    "canvasHeight": 1350,
+    "outputScale": 3,
+    "panelClip": "polygon(8.5% 0, 83% 0, 49% 100%, 0 100%, 0 25%)",
+    "copyLeft": "2.1%",
+    "copyTop": "21.9%",
+    "copyWidth": "69%",
+    "titleSize": "76px",
+    "thirdLineSize": "45px",
+    "nameSize": "34px",
+    "bookingLabelSize": "39px",
+    "bookingDateSize": "74px",
+    "ctaSize": "31px",
+    "urlSize": "20px",
+    "footerBottom": "20%",
+    "churchPosition": "32% 50%",
+    "churchScale": 1.03,
+    "churchBrightness": 0.72,
+    "churchSaturation": 0.78
+  },
+  "assets": {
+    "church": "assets/02-louisiana-bayou.webp",
+    "zenrayLogo": "assets/zenray-logo.svg",
+    "social": [
+      { "name": "Instagram", "src": "assets/social/instagram.svg" },
+      { "name": "YouTube", "src": "assets/social/youtube.svg" },
+      { "name": "LinkedIn", "src": "assets/social/linkedin.svg" },
+      { "name": "ArtStation", "src": "assets/social/artstation.svg" }
+    ]
+  }
+}

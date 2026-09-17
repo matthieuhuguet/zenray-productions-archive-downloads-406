@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ZenRay Freelance Tech Artist</title>
+  <style>
+    /* 2026-09-17 01:02, geometry and typography reproduce reffinal4-5.png. */
+    @font-face { font-family: '{{FONT_FAMILY}}'; src: url('{{FONT_PATH}}') format('opentype'); font-weight: {{FONT_WEIGHT}}; }
+    :root {
+      --background: {{BACKGROUND}}; --white: {{WHITE}}; --orange: {{ORANGE}};
+      --tracking: {{TRACKING}}; --title-size: {{TITLE_SIZE}}; --third-line-size: {{THIRD_LINE_SIZE}};
+      --name-size: {{NAME_SIZE}}; --booking-label-size: {{BOOKING_LABEL_SIZE}};
+      --booking-date-size: {{BOOKING_DATE_SIZE}}; --cta-size: {{CTA_SIZE}}; --url-size: {{URL_SIZE}}; --panel-clip: {{PANEL_CLIP}};
+      --copy-left: {{COPY_LEFT}}; --copy-top: {{COPY_TOP}}; --copy-width: {{COPY_WIDTH}};
+      --church-position: {{CHURCH_POSITION}}; --church-scale: {{CHURCH_SCALE}};
+      --church-brightness: {{CHURCH_BRIGHTNESS}}; --church-saturation: {{CHURCH_SATURATION}};
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #090909; font-family: '{{FONT_FAMILY}}', sans-serif; }
+    body { display: grid; place-items: center; }
+    .canvas { position: relative; width: {{CANVAS_WIDTH}}px; height: {{CANVAS_HEIGHT}}px; overflow: hidden; background: var(--background); color: var(--white); }
+    .church { position: absolute; inset: 0; margin: 0; overflow: hidden; background: var(--background); }
+    .church img { width: 100%; height: 100%; object-fit: cover; object-position: var(--church-position); transform: scale(var(--church-scale)); filter: brightness(var(--church-brightness)) saturate(var(--church-saturation)); }
+    .panel { position: absolute; z-index: 2; inset: 0; background: var(--background); clip-path: var(--panel-clip); }
+    .copy { position: absolute; z-index: 3; left: var(--copy-left); top: var(--copy-top); width: var(--copy-width); text-transform: uppercase; letter-spacing: var(--tracking); }
+    .title { margin: 0; font-size: var(--title-size); line-height: .94; letter-spacing: var(--tracking); }
+    .title span { display: block; white-space: nowrap; }
+    .title span + span { margin-top: .08em; }
+    .title .orange { color: var(--orange); }
+    .title .third { margin-top: .24em; font-size: var(--third-line-size); color: var(--white); letter-spacing: .13em; }
+    .name { margin-top: 13%; font-size: var(--name-size); line-height: 1; letter-spacing: .1em; }
+    .booking { margin-top: 8%; }
+    .booking-label { font-size: var(--booking-label-size); line-height: 1; }
+    .booking-date { margin-top: 2.2%; color: var(--orange); font-size: var(--booking-date-size); line-height: .9; }
+    .booking-date span { display: block; }
+    .cta { display: inline-block; margin-top: 5.5%; padding: .52em 1.02em .48em; background: var(--orange); color: var(--background); font-size: var(--cta-size); line-height: 1; letter-spacing: .06em; }
+    .url { margin-top: 2.7%; color: var(--white); font-size: var(--url-size); line-height: 1; letter-spacing: .045em; text-transform: none; }
+    .footer { position: absolute; z-index: 3; left: 2.1%; bottom: {{FOOTER_BOTTOM}}; height: 40px; display: flex; align-items: center; gap: 22px; }
+    .zenray-logo { display: block; width: 112px; height: 34px; object-fit: contain; object-position: center; filter: brightness(0) invert(1); }
+    .socials { height: 40px; display: flex; align-items: center; gap: 14px; }
+    .social-icon { display: block; width: 34px; height: 34px; object-fit: contain; object-position: center; filter: brightness(0) invert(1); }
+    .render .controls { display: none; }
+    .controls { position: fixed; z-index: 20; right: 18px; top: 18px; width: 280px; padding: 14px; color: var(--white); background: rgba(26,26,26,.96); border: 1px solid rgba(255,255,255,.18); font: 12px/1.4 '{{FONT_FAMILY}}', sans-serif; }
+    .controls label { display: block; margin: 9px 0; }
+    .controls input { width: 100%; accent-color: var(--orange); }
+  </style>
+</head>
+<body>
+  <main class="canvas" aria-label="ZenRay freelance technical artist commercial">
+    <figure class="church"><img src="{{CHURCH}}" alt="Louisiana Bayou church environment"></figure>
+    <div class="panel"></div>
+    <section class="copy">
+      <h1 class="title"><span>{{TITLE_LINE_ONE}}</span><span class="orange">{{TITLE_LINE_TWO}}</span><span class="third">{{TITLE_LINE_THREE}}</span></h1>
+      <div class="name">{{NAME}}</div>
+      <div class="booking"><div class="booking-label">{{BOOKING_LABEL}}</div><div class="booking-date"><span>{{BOOKING_MONTH}}</span><span>{{BOOKING_YEAR}}</span></div><div class="cta">{{CTA}}</div><div class="url">{{URL}}</div></div>
+    </section>
+    <footer class="footer"><img class="zenray-logo" src="{{ZENRAY_LOGO}}" alt="ZenRay"><div class="socials">{{SOCIAL_ICONS}}</div></footer>
+  </main>
+  <aside class="controls">
+    <label>Title size<input data-variable="--title-size" type="range" min="60" max="92" value="76"></label>
+    <label>Panel top edge<input data-panel="1" type="range" min="76" max="90" value="83"></label>
+    <label>Church horizontal position<input data-variable="--church-position" type="range" min="20" max="75" value="32"></label>
+  </aside>
+  <script>
+    const CONFIG = {{CONFIG_JSON}};
+    const root = document.documentElement;
+    document.querySelectorAll('[data-variable]').forEach(input => input.addEventListener('input', () => {
+      const variable = input.dataset.variable;
+      root.style.setProperty(variable, variable === '--church-position' ? `${input.value}% 50%` : `${input.value}px`);
+    }));
+    document.querySelector('[data-panel]').addEventListener('input', event => {
+      root.style.setProperty('--panel-clip', `polygon(8.5% 0, ${event.target.value}% 0, 49% 100%, 0 100%, 0 25%)`);
+    });
+    if (new URLSearchParams(location.search).get('render') === '1') document.body.classList.add('render');
+    document.fonts.ready.then(() => {
+      const canvas = document.querySelector('.canvas').getBoundingClientRect();
+      const fits = [...document.querySelectorAll('.copy, .copy *, .footer, .footer *')].every(element => {
+        const box = element.getBoundingClientRect();
+        return box.left >= canvas.left && box.top >= canvas.top && box.right <= canvas.right && box.bottom <= canvas.bottom;
+      });
+      document.body.dataset.ready = 'true';
+      document.body.dataset.fontLoaded = String(document.fonts.check('700 24px "{{FONT_FAMILY}}"'));
+      document.body.dataset.layoutFits = String(fits);
+    });
+  </script>
+</body>
+</html>
